@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>কালেন্ডার শেখার পেজ</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bangla&display=swap');
+
+body{
+    font-family: 'Noto Sans Bangla', sans-serif;
+    margin:0;
+    background:#f0f8ff;
+    text-align:center;
+}
+header{
+    background:#2196f3;
+    color:white;
+    padding:12px;
+    font-size:20px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+header a{
+    color:white;
+    text-decoration:none;
+    background:#4caf50;
+    padding:6px 12px;
+    border-radius:8px;
+    font-size:16px;
+}
+
+.section{
+    margin:15px auto;
+    max-width:900px;
+    padding:10px;
+    border-radius:10px;
+    background:white;
+    box-shadow:0 0 10px rgba(0,0,0,0.2);
+}
+h3{margin-bottom:10px;}
+
+button{
+    margin:5px;
+    padding:14px 20px;
+    border:none;
+    border-radius:10px;
+    background:#4caf50;
+    color:white;
+    font-size:18px;
+    cursor:pointer;
+    min-width:120px;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap:12px;
+    justify-items:center;
+}
+
+#dateTimeEn{
+    font-size:20px;
+    margin-top:5px;
+    font-weight:bold;
+}
+
+.drag-drop{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:10px;
+}
+
+.drag-item{
+    background:#ff9800;
+    padding:12px 16px;
+    border-radius:8px;
+    color:white;
+    cursor:pointer;
+    font-size:18px;
+}
+
+.selected{
+    background:#e91e63 !important;
+}
+
+#quizResult{
+    margin-top:10px;
+    font-size:20px;
+    font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+📅 বাংলা ও ইংরেজি মাস ও সপ্তাহের দিন শেখা
+<a href="index.html">🏠 হোম</a>
+</header>
+
+<div class="section">
+<h3>বাংলা ৭ দিনের নাম</h3>
+<div class="grid" id="bnDaysGrid"></div>
+</div>
+
+<div class="section">
+<h3>বাংলা ১২ মাসের নাম</h3>
+<div class="grid" id="bnMonthsGrid"></div>
+</div>
+
+<div class="section">
+<h3>ইংরেজি ৭ দিনের নাম</h3>
+<div class="grid" id="enDaysGrid"></div>
+</div>
+
+<div class="section">
+<h3>ইংরেজি ১২ মাসের নাম</h3>
+<div class="grid" id="enMonthsGrid"></div>
+</div>
+
+<div class="section">
+<h3>আজকের ইংরেজি তারিখ ও সময়</h3>
+<div id="dateTimeEn"></div>
+</div>
+
+<!-- Quiz -->
+<div class="section">
+<h3 id="quizTitle"></h3>
+<div class="drag-drop" id="quizContainer"></div>
+<div id="quizResult"></div>
+<button id="checkBtn">✔️ পরীক্ষা করো</button>
+<button id="nextBtn" style="display:none;">➡️ পরবর্তী</button>
+</div>
+
+<script>
+
+// Data
+const bnDays = ["শনিবার","রবিবার","সোমবার","মঙ্গলবার","বুধবার","বৃহস্পতিবার","শুক্রবার"];
+const bnMonths = ["বৈশাখ","জ্যৈষ্ঠ","আষাঢ়","শ্রাবণ","ভাদ্র","আশ্বিন","কার্তিক","অগ্রহায়ণ","পৌষ","মাঘ","ফাল্গুন","চৈত্র"];
+const enDays = ["Saturday","Sunday","Monday","Tuesday","Wednesday","Thursday","Friday"];
+const enMonths = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+// Render learning buttons
+function renderGrid(id, arr, lang){
+    let div=document.getElementById(id);
+    arr.forEach(item=>{
+        let b=document.createElement("button");
+        b.innerText=item;
+        b.onclick=()=>speak(item,lang);
+        div.appendChild(b);
+    });
+}
+
+renderGrid("bnDaysGrid",bnDays,"bn");
+renderGrid("bnMonthsGrid",bnMonths,"bn");
+renderGrid("enDaysGrid",enDays,"en");
+renderGrid("enMonthsGrid",enMonths,"en");
+
+// Date
+function updateDateTime(){
+    let n=new Date();
+    let str=`${enDays[n.getDay()]}, ${enMonths[n.getMonth()]} ${n.getDate()}, ${n.getFullYear()} ${n.getHours()}:${n.getMinutes().toString().padStart(2,"0")}`;
+    document.getElementById("dateTimeEn").innerText=str;
+}
+setInterval(updateDateTime,1000);
+updateDateTime();
+
+// ✅ Voice (বাংলা ফিক্স)
+function speak(text,lang){
+    let msg=new SpeechSynthesisUtterance(text);
+
+    let voices = speechSynthesis.getVoices();
+
+    if(lang==="bn"){
+        let bnVoice = voices.find(v => v.lang.includes("bn"));
+        if(bnVoice){
+            msg.voice = bnVoice;
+            msg.lang = bnVoice.lang;
+        }else{
+            msg.lang = "en-US"; // fallback
+        }
+    }else{
+        let enVoice = voices.find(v => v.lang.includes("en"));
+        if(enVoice){
+            msg.voice = enVoice;
+            msg.lang = enVoice.lang;
+        }else{
+            msg.lang = "en-US";
+        }
+    }
+
+    speechSynthesis.speak(msg);
+}
+
+// voice load fix
+speechSynthesis.onvoiceschanged = () => {};
+
+// Quiz Data
+let quizzes=[
+{title:"বাংলা ৭ দিনের নাম সাজাও",data:bnDays},
+{title:"বাংলা ১২ মাস সাজাও",data:bnMonths},
+{title:"English Days সাজাও",data:enDays},
+{title:"English Months সাজাও",data:enMonths},
+];
+
+let current=0;
+let selected=null;
+
+function renderQuiz(){
+    let container=document.getElementById("quizContainer");
+    container.innerHTML="";
+    let items=quizzes[current].data.slice().sort(()=>Math.random()-0.5);
+
+    items.forEach((item,i)=>{
+        let d=document.createElement("div");
+        d.className="drag-item";
+        d.innerText=item;
+
+        d.onclick=()=>{
+            if(selected===null){
+                selected=d;
+                d.classList.add("selected");
+            }else{
+                let temp=selected.innerText;
+                selected.innerText=d.innerText;
+                d.innerText=temp;
+
+                selected.classList.remove("selected");
+                selected=null;
+            }
+        };
+
+        container.appendChild(d);
+    });
+
+    document.getElementById("quizTitle").innerText=quizzes[current].title;
+    document.getElementById("quizResult").innerText="";
+    document.getElementById("nextBtn").style.display="none";
+}
+
+document.getElementById("checkBtn").onclick=()=>{
+    let items=[...document.getElementById("quizContainer").children].map(x=>x.innerText);
+    let correct=items.every((v,i)=>v===quizzes[current].data[i]);
+
+    let res=document.getElementById("quizResult");
+
+    if(correct){
+        res.innerText="🎉 ঠিক হয়েছে!";
+        res.style.color="green";
+        document.getElementById("nextBtn").style.display="inline-block";
+    }else{
+        res.innerText="❌ আবার চেষ্টা করুন";
+        res.style.color="red";
+    }
+};
+
+document.getElementById("nextBtn").onclick=()=>{
+    current++;
+    if(current<quizzes.length){
+        renderQuiz();
+    }else{
+        document.getElementById("quizTitle").innerText="সব কুইজ শেষ 🎉";
+        document.getElementById("quizContainer").innerHTML="";
+    }
+};
+
+renderQuiz();
+
+</script>
+
+</body>
+</html>
