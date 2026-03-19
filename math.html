@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Math Learning</title>
+
+<style>
+
+body{
+font-family:Arial;
+text-align:center;
+background:#e8f5e9;
+margin:0;
+}
+
+/* 🏠 Home Button */
+.homeBtn{
+position:fixed;
+top:10px;
+left:10px;
+background:#4caf50;
+color:white;
+border:none;
+padding:10px 15px;
+border-radius:10px;
+cursor:pointer;
+}
+
+header{
+background:#4caf50;
+color:white;
+padding:15px;
+font-size:24px;
+}
+
+.container{
+background:white;
+margin:20px auto;
+padding:20px;
+border-radius:15px;
+max-width:400px;
+box-shadow:0 2px 8px rgba(0,0,0,0.2);
+}
+
+button{
+padding:10px;
+margin:5px;
+font-size:16px;
+cursor:pointer;
+border:none;
+border-radius:8px;
+}
+
+.startBtn{background:#4caf50;color:white;}
+.stopBtn{background:#f44336;color:white;}
+.submitBtn{background:#2196f3;color:white;}
+
+input{
+padding:8px;
+font-size:18px;
+width:120px;
+text-align:center;
+margin:10px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- 🏠 Back -->
+<button class="homeBtn" onclick="goHome()">🏠 Home</button>
+
+<header>
+🧮 Math Learning
+</header>
+
+<div class="container">
+
+<p id="question">Click Start</p>
+
+<input type="number" id="answer" placeholder="Answer">
+
+<br>
+
+<button class="submitBtn" onclick="checkAnswer()">Submit</button>
+<button class="startBtn" onclick="startGame()">Start</button>
+<button class="stopBtn" onclick="stopGame()">Stop</button>
+
+<p>⏱️ Time: <span id="time">0</span></p>
+<p>⭐ Score: <span id="score">0</span></p>
+
+<p id="result"></p>
+
+</div>
+
+<script>
+
+// 🏠 Back
+function goHome(){
+  window.location.href="index.html";
+}
+
+// 🔊 Voice
+function speak(text){
+let msg=new SpeechSynthesisUtterance(text);
+msg.lang="en-US";
+speechSynthesis.cancel();
+speechSynthesis.speak(msg);
+}
+
+let num1, num2, operator;
+let score=0;
+let time=0;
+let timer;
+
+function startGame(){
+
+score=0;
+time=0;
+
+document.getElementById("score").innerText=score;
+document.getElementById("time").innerText=time;
+
+generateQuestion();
+
+clearInterval(timer);
+
+timer=setInterval(()=>{
+time++;
+document.getElementById("time").innerText=time;
+},1000);
+
+}
+
+function stopGame(){
+clearInterval(timer);
+document.getElementById("question").innerText="Game Stopped";
+speak("Game stopped");
+}
+
+function generateQuestion(){
+
+let ops=["+","-","×","÷"];
+
+operator=ops[Math.floor(Math.random()*4)];
+
+num1=Math.floor(Math.random()*10)+1;
+num2=Math.floor(Math.random()*10)+1;
+
+// division fix
+if(operator=="÷"){
+num1=num1*num2;
+}
+
+document.getElementById("question").innerText=
+num1+" "+operator+" "+num2+" = ?";
+
+document.getElementById("answer").value="";
+
+// 🔊 question voice
+speak(num1 + " " + operator + " " + num2);
+
+}
+
+function checkAnswer(){
+
+let userAns=document.getElementById("answer").value;
+
+if(userAns===""){
+document.getElementById("result").innerText="⚠️ Enter Answer!";
+return;
+}
+
+let correct;
+
+switch(operator){
+case "+": correct=num1+num2; break;
+case "-": correct=num1-num2; break;
+case "×": correct=num1*num2; break;
+case "÷": correct=num1/num2; break;
+}
+
+if(parseInt(userAns)==correct){
+score++;
+document.getElementById("result").innerText="✅ Correct!";
+speak("Correct");
+}else{
+document.getElementById("result").innerText="❌ Wrong! Ans: "+correct;
+speak("Wrong");
+}
+
+document.getElementById("score").innerText=score;
+
+setTimeout(generateQuestion,800);
+
+}
+
+</script>
+
+</body>
+</html>

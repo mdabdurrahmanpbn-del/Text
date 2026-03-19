@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Smart Kids Quiz</title>
+
+<style>
+
+body{
+font-family:Arial;
+margin:0;
+text-align:center;
+background:linear-gradient(135deg,#a1c4fd,#c2e9fb);
+}
+
+header{
+background:#2196f3;
+color:white;
+padding:20px;
+font-size:26px;
+font-weight:bold;
+}
+
+.homeBtn{
+position:fixed;
+top:10px;
+left:10px;
+background:#ff5722;
+color:white;
+border:none;
+padding:10px 15px;
+border-radius:10px;
+cursor:pointer;
+}
+
+.quiz{
+background:white;
+margin:20px auto;
+padding:20px;
+border-radius:20px;
+max-width:420px;
+box-shadow:0 5px 15px rgba(0,0,0,0.2);
+}
+
+.progress{
+height:10px;
+background:#ddd;
+border-radius:10px;
+overflow:hidden;
+margin-bottom:15px;
+}
+
+.progress-bar{
+height:10px;
+background:#4caf50;
+width:0%;
+}
+
+#question{
+font-size:22px;
+margin:15px 0;
+}
+
+.optionBtn{
+display:block;
+width:100%;
+padding:18px;
+margin:10px 0;
+font-size:22px;
+border:none;
+border-radius:12px;
+color:white;
+cursor:pointer;
+transition:0.3s;
+}
+
+.optionBtn:nth-child(1){background:#4caf50;}
+.optionBtn:nth-child(2){background:#03a9f4;}
+.optionBtn:nth-child(3){background:#ff9800;}
+
+.optionBtn:hover{transform:scale(1.05);}
+.optionBtn:active{transform:scale(0.95);}
+
+.info{
+margin-top:10px;
+font-size:18px;
+}
+
+#result{
+font-size:20px;
+margin-top:10px;
+font-weight:bold;
+}
+
+/* 🎉 FINISH SCREEN */
+.end{
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.7);
+justify-content:center;
+align-items:center;
+z-index:1000;
+}
+
+.finishBox{
+background:white;
+padding:30px;
+border-radius:20px;
+text-align:center;
+animation:pop 0.5s ease;
+}
+
+.finishBox h1{
+color:#ff5722;
+font-size:32px;
+}
+
+.finishBox p{
+font-size:24px;
+margin:15px 0;
+}
+
+.finishBox button{
+padding:12px 20px;
+font-size:18px;
+background:#4caf50;
+color:white;
+border:none;
+border-radius:10px;
+cursor:pointer;
+}
+
+@keyframes pop{
+0%{transform:scale(0.5);opacity:0;}
+100%{transform:scale(1);opacity:1;}
+}
+
+/* 🎊 Confetti */
+.confetti{
+position:fixed;
+width:10px;
+height:10px;
+top:-10px;
+animation:fall 3s linear;
+}
+
+@keyframes fall{
+to{
+transform:translateY(100vh) rotate(360deg);
+}
+}
+
+button{
+padding:10px 15px;
+margin:5px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+}
+
+.startBtn{background:#4caf50;color:white;}
+.restartBtn{background:#f44336;color:white;}
+
+</style>
+</head>
+
+<body>
+
+<button class="homeBtn" onclick="goHome()">🏠 Home</button>
+
+<header>📝 Smart Quiz</header>
+
+<div class="quiz">
+
+<div class="progress">
+<div class="progress-bar" id="progressBar"></div>
+</div>
+
+<p id="qNo">Question 1/20</p>
+
+<p id="question"></p>
+
+<div id="options"></div>
+
+<div class="info">
+⏱️ <span id="time">0</span> sec | ⭐ <span id="score">0</span>
+</div>
+
+<p id="result"></p>
+
+<button class="startBtn" onclick="startQuiz()">Start</button>
+<button class="restartBtn" onclick="restartQuiz()">Restart</button>
+
+</div>
+
+<!-- 🎉 Finish Screen -->
+<div class="end" id="endScreen">
+  <div class="finishBox">
+    <h1>🎉 Congratulations!</h1>
+    <p id="finalScore"></p>
+    <button onclick="restartQuiz()">🔄 Play Again</button>
+  </div>
+</div>
+
+<script>
+
+// Home
+function goHome(){
+window.location.href="index.html";
+}
+
+// 🔊 SOUND (no mp3)
+function playSound(){
+let ctx=new (window.AudioContext||window.webkitAudioContext)();
+
+let notes=[261,329,392,523]; // happy tone
+
+notes.forEach((freq,i)=>{
+let osc=ctx.createOscillator();
+let gain=ctx.createGain();
+
+osc.connect(gain);
+gain.connect(ctx.destination);
+
+osc.frequency.value=freq;
+osc.type="sine";
+
+gain.gain.setValueAtTime(0.2,ctx.currentTime);
+
+osc.start(ctx.currentTime+i*0.2);
+osc.stop(ctx.currentTime+i*0.2+0.2);
+});
+}
+
+// Shuffle
+function shuffle(arr){
+for(let i=arr.length-1;i>0;i--){
+let j=Math.floor(Math.random()*(i+1));
+[arr[i],arr[j]]=[arr[j],arr[i]];
+}
+return arr;
+}
+
+// Questions
+let quizData=[ ...[
+{q:"Number 5 ?", options:["3","5","7"], ans:"5"},
+{q:"Number 10 ?", options:["8","10","12"], ans:"10"},
+{q:"Number 15 ?", options:["14","15","16"], ans:"15"},
+{q:"Letter A ?", options:["A","B","C"], ans:"A"},
+{q:"Letter D ?", options:["C","D","E"], ans:"D"},
+{q:"Letter M ?", options:["L","M","N"], ans:"M"},
+{q:"Letter Z ?", options:["X","Y","Z"], ans:"Z"},
+{q:"অক্ষর ক ?", options:["ক","খ","গ"], ans:"ক"},
+{q:"অক্ষর গ ?", options:["ক","গ","ঘ"], ans:"গ"},
+{q:"অক্ষর ত ?", options:["ত","থ","দ"], ans:"ত"},
+{q:"2 + 2 ?", options:["3","4","5"], ans:"4"},
+{q:"3 + 1 ?", options:["4","5","6"], ans:"4"},
+{q:"5 - 2 ?", options:["2","3","4"], ans:"3"},
+{q:"6 - 1 ?", options:["4","5","6"], ans:"5"},
+{q:"2 x 3 ?", options:["5","6","7"], ans:"6"},
+{q:"4 x 2 ?", options:["6","8","10"], ans:"8"},
+{q:"8 / 2 ?", options:["2","4","6"], ans:"4"},
+{q:"10 / 2 ?", options:["3","5","7"], ans:"5"},
+{q:"Which is vowel?", options:["B","A","D"], ans:"A"},
+{q:"Which is number?", options:["A","5","B"], ans:"5"}
+]];
+
+let shuffled=[];
+let current=0;
+let score=0;
+let time=0;
+let timer;
+
+function startQuiz(){
+shuffled=shuffle([...quizData]);
+current=0;
+score=0;
+time=0;
+
+document.getElementById("score").innerText=score;
+document.getElementById("time").innerText=time;
+document.getElementById("endScreen").style.display="none";
+
+showQ();
+
+clearInterval(timer);
+timer=setInterval(()=>{
+time++;
+document.getElementById("time").innerText=time;
+},1000);
+}
+
+function restartQuiz(){
+startQuiz();
+}
+
+function showQ(){
+
+let q=shuffled[current];
+
+document.getElementById("qNo").innerText=
+"Question "+(current+1)+"/"+shuffled.length;
+
+document.getElementById("question").innerText=q.q;
+
+let progress=(current/shuffled.length)*100;
+document.getElementById("progressBar").style.width=progress+"%";
+
+let optDiv=document.getElementById("options");
+optDiv.innerHTML="";
+
+q.options.forEach(opt=>{
+let btn=document.createElement("button");
+btn.className="optionBtn";
+btn.innerText=opt;
+btn.onclick=()=>checkAns(opt);
+optDiv.appendChild(btn);
+});
+
+}
+
+function checkAns(ans){
+
+let correct=shuffled[current].ans;
+
+if(ans===correct){
+score++;
+document.getElementById("score").innerText=score;
+document.getElementById("result").innerText="✅ Correct!";
+}else{
+document.getElementById("result").innerText="❌ Wrong!";
+}
+
+current++;
+
+if(current>=shuffled.length){
+endQuiz();
+return;
+}
+
+setTimeout(()=>{
+document.getElementById("result").innerText="";
+showQ();
+},800);
+}
+
+// 🎉 FINAL
+function endQuiz(){
+
+clearInterval(timer);
+
+document.getElementById("endScreen").style.display="flex";
+
+document.getElementById("finalScore").innerText=
+"⭐ Score: "+score+" / "+shuffled.length;
+
+// 🔊 sound
+playSound();
+
+// 🎊 confetti
+for(let i=0;i<60;i++){
+let c=document.createElement("div");
+c.className="confetti";
+
+c.style.left=Math.random()*100+"%";
+c.style.background=
+["red","yellow","blue","green","orange"][Math.floor(Math.random()*5)];
+
+c.style.animationDuration=(Math.random()*2+2)+"s";
+
+document.body.appendChild(c);
+
+setTimeout(()=>c.remove(),3000);
+}
+
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>বাংলা বর্ণমালা</title>
+
+<style>
+
+body{
+font-family:"Noto Sans Bengali", Arial;
+margin:0;
+background:#e8f5e9;
+text-align:center;
+}
+
+/* 🏠 Back Button */
+.homeBtn{
+position:fixed;
+top:10px;
+left:10px;
+background:#4caf50;
+color:white;
+border:none;
+padding:10px 15px;
+border-radius:10px;
+cursor:pointer;
+}
+
+header{
+background:#4caf50;
+color:white;
+padding:15px;
+font-size:24px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:10px;
+padding:10px;
+}
+
+.card{
+background:#66bb6a;
+color:white;
+padding:20px;
+border-radius:15px;
+cursor:pointer;
+transition:0.3s;
+}
+
+.card:hover{
+transform:scale(1.1);
+background:#ff9800;
+}
+
+.letter{
+font-size:32px;
+font-weight:bold;
+}
+
+.bounce{
+animation:bounce 0.4s;
+}
+
+@keyframes bounce{
+0%{transform:scale(1);}
+50%{transform:scale(1.3);}
+100%{transform:scale(1);}
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- 🏠 Back -->
+<button class="homeBtn" onclick="goHome()">🏠 Home</button>
+
+<header>
+🔡 বাংলা বর্ণমালা
+</header>
+
+<div class="grid" id="bangla"></div>
+
+<script>
+
+// 🏠 Back
+function goHome(){
+  window.location.href="index.html";
+}
+
+// 🔊 বাংলা Voice
+function speak(text){
+
+let msg=new SpeechSynthesisUtterance(text);
+msg.lang="bn-BD";  // বাংলা ভয়েস
+msg.rate=0.9;
+
+speechSynthesis.cancel();
+speechSynthesis.speak(msg);
+
+}
+
+// Letters
+let letters=[
+"অ","আ","ই","ঈ","উ","ঊ","ঋ","এ","ঐ","ও","ঔ",
+
+"ক","খ","গ","ঘ","ঙ",
+"চ","ছ","জ","ঝ","ঞ",
+"ট","ঠ","ড","ঢ","ণ",
+"ত","থ","দ","ধ","ন",
+"প","ফ","ব","ভ","ম",
+"য","র","ল","শ","ষ","স","হ",
+"ড়","ঢ়","য়"
+];
+
+let grid=document.getElementById("bangla");
+
+// Create Cards
+for(let i=0;i<letters.length;i++){
+
+let div=document.createElement("div");
+div.className="card";
+
+div.innerHTML=
+'<div class="letter">'+letters[i]+'</div>';
+
+div.onclick=function(){
+
+div.classList.add("bounce");
+
+// 🔊 শুধু বর্ণ বলবে
+speak(letters[i]);
+
+setTimeout(()=>div.classList.remove("bounce"),400);
+
+};
+
+grid.appendChild(div);
+
+}
+
+</script>
+
+</body>
+</html>

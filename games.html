@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Memory Game</title>
+
+<style>
+
+body{
+font-family:Arial;
+text-align:center;
+background:#fff3e0;
+margin:0;
+}
+
+/* 🏠 Home Button */
+.homeBtn{
+position:fixed;
+top:10px;
+left:10px;
+background:#ff9800;
+color:white;
+border:none;
+padding:10px 15px;
+border-radius:10px;
+cursor:pointer;
+}
+
+header{
+background:#ff9800;
+color:white;
+padding:15px;
+font-size:24px;
+}
+
+#game{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:10px;
+padding:10px;
+}
+
+.card{
+height:80px;
+background:#ff5722;
+color:white;
+font-size:24px;
+display:flex;
+justify-content:center;
+align-items:center;
+border-radius:10px;
+cursor:pointer;
+}
+
+.open{
+background:#4caf50;
+}
+
+.matched{
+background:#9e9e9e;
+cursor:default;
+}
+
+.info{
+margin:10px;
+}
+
+button{
+padding:8px 12px;
+margin:5px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+}
+
+.startBtn{background:#4caf50;color:white;}
+.restartBtn{background:#2196f3;color:white;}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- 🏠 Back -->
+<button class="homeBtn" onclick="goHome()">🏠 Home</button>
+
+<header>
+🧠 Memory Game
+</header>
+
+<div class="info">
+⏱️ Time: <span id="time">0</span> sec  
+⭐ Score: <span id="score">0</span>
+<br>
+<button class="startBtn" onclick="startGame()">Start</button>
+<button class="restartBtn" onclick="restartGame()">Restart</button>
+</div>
+
+<div id="game"></div>
+
+<script>
+
+// 🏠 Back
+function goHome(){
+  window.location.href="index.html";
+}
+
+// 🔊 Voice
+function speak(text){
+let msg=new SpeechSynthesisUtterance(text);
+msg.lang="en-US";
+speechSynthesis.cancel();
+speechSynthesis.speak(msg);
+}
+
+let numbers=[];
+let first=null;
+let second=null;
+let lock=false;
+let score=0;
+let time=0;
+let timer;
+let started=false;
+
+let game=document.getElementById("game");
+
+// Shuffle function (better)
+function shuffle(arr){
+for(let i=arr.length-1;i>0;i--){
+let j=Math.floor(Math.random()*(i+1));
+[arr[i],arr[j]]=[arr[j],arr[i]];
+}
+return arr;
+}
+
+function startGame(){
+
+started=true;
+
+numbers=[];
+for(let i=1;i<=10;i++){
+numbers.push(i);
+numbers.push(i);
+}
+
+shuffle(numbers);
+
+clearInterval(timer);
+time=0;
+score=0;
+
+document.getElementById("time").innerText=time;
+document.getElementById("score").innerText=score;
+
+timer=setInterval(()=>{
+time++;
+document.getElementById("time").innerText=time;
+},1000);
+
+createBoard();
+
+}
+
+function restartGame(){
+startGame();
+}
+
+function createBoard(){
+
+game.innerHTML="";
+
+numbers.forEach(num=>{
+
+let div=document.createElement("div");
+div.className="card";
+div.dataset.value=num;
+
+div.onclick=function(){
+
+if(!started) return;
+if(lock) return;
+if(div.classList.contains("matched")) return;
+if(div===first) return;
+
+div.innerText=num;
+div.classList.add("open");
+
+if(!first){
+first=div;
+}else{
+second=div;
+lock=true;
+
+if(first.dataset.value===second.dataset.value){
+
+first.classList.add("matched");
+second.classList.add("matched");
+
+score++;
+document.getElementById("score").innerText=score;
+
+reset();
+
+// 🎉 Win
+if(score===10){
+clearInterval(timer);
+speak("Congratulations, You Win!");
+setTimeout(()=>alert("🎉 You Win!"),300);
+}
+
+}else{
+
+setTimeout(()=>{
+first.innerText="";
+second.innerText="";
+first.classList.remove("open");
+second.classList.remove("open");
+reset();
+},700);
+
+}
+
+}
+
+};
+
+game.appendChild(div);
+
+});
+
+}
+
+function reset(){
+first=null;
+second=null;
+lock=false;
+}
+
+</script>
+
+</body>
+</html>
