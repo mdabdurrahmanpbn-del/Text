@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Kids Learning App</title>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial;
+background:#f0f8ff;
+}
+
+header{
+background:#ff5722;
+color:white;
+text-align:center;
+padding:15px;
+font-size:24px;
+}
+
+.menu{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:15px;
+padding:15px;
+}
+
+.card{
+background:white;
+padding:25px;
+border-radius:15px;
+text-align:center;
+font-size:18px;
+font-weight:bold;
+box-shadow:0 3px 8px rgba(0,0,0,0.2);
+cursor:pointer;
+transition:0.3s;
+}
+
+.card:hover{
+transform:scale(1.05);
+background:#e3f2fd;
+}
+
+.footer{
+text-align:center;
+padding:10px;
+font-size:14px;
+color:#555;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+🎓 Kids Learning App By Arifur Rahman
+</header>
+
+<div class="menu">
+
+<div class="card" onclick="openPage('numbers.html')">🔢 Numbers</div>
+<div class="card" onclick="openPage('alphabet.html')">🔤 Alphabet</div>
+<div class="card" onclick="openPage('bangla.html')">🔡 বাংলা</div>
+<div class="card" onclick="openPage('math.html')">➕ Math</div>
+<div class="card" onclick="openPage('games.html')">🎮 Games</div>
+<div class="card" onclick="openPage('quiz.html')">🧠 Quiz</div>
+
+</div>
+
+<div class="footer">
+Offline Kids Learning App
+</div>
+
+<script>
+
+function openPage(page){
+    window.location.href = page;
+}
+
+</script>
+
+</body>
+</html>
