@@ -13,7 +13,6 @@ background:#e3f2fd;
 text-align:center;
 }
 
-/* HEADER */
 header{
 background:#2196f3;
 color:white;
@@ -31,7 +30,6 @@ color:white;
 text-decoration:none;
 }
 
-/* BUTTON AREA */
 .top-buttons{
 background:#e3f2fd;
 display:flex;
@@ -55,7 +53,6 @@ color:white;
 font-size:13px;
 }
 
-/* INFO BAR */
 .info-bar{
 background:white;
 display:flex;
@@ -72,7 +69,6 @@ z-index:9;
 #levelProgress{ color:#2196f3; }
 #timer{ color:#ff5722; }
 
-/* GAME AREA */
 .game-area{
 padding:15px;
 }
@@ -144,30 +140,23 @@ font-weight:bold;
 
 <script>
 
-/* 🔊 SOUND SYSTEM */
+/* 🔊 SOUND */
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
 function beep(freq, duration){
 let osc = audioCtx.createOscillator();
 let gain = audioCtx.createGain();
-
 osc.connect(gain);
 gain.connect(audioCtx.destination);
-
 osc.frequency.value = freq;
-osc.type = "sine";
-
 osc.start();
-
 gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
 gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-
 osc.stop(audioCtx.currentTime + duration);
 }
 
 function playSound(type){
 if(type==="wrong") beep(150,0.5);
-
 if(type==="win"){
 beep(700,0.2);
 setTimeout(()=>beep(900,0.2),150);
@@ -176,34 +165,37 @@ setTimeout(()=>beep(1100,0.3),300);
 }
 
 document.body.addEventListener("click", () => {
-if(audioCtx.state === "suspended"){
-audioCtx.resume();
-}
-}, { once:true });
+if(audioCtx.state==="suspended") audioCtx.resume();
+}, {once:true});
 
-/* 🔊 VOICE SYSTEM (FINAL FIX) */
+/* 🔊 VOICE (BD FIX FINAL) */
 let voices = [];
 
-speechSynthesis.onvoiceschanged = () => {
+function loadVoices(){
 voices = speechSynthesis.getVoices();
-};
+}
+
+loadVoices();
+speechSynthesis.onvoiceschanged = loadVoices;
 
 function speak(text){
 
-// ❌ voice OFF for letters
 if(currentCategory==="bn_vowel" || currentCategory==="bn_consonant") return;
 
 let u = new SpeechSynthesisUtterance(text);
 
-// বাংলা voice
 if(currentCategory==="bn_month" || currentCategory==="bn_day"){
 
-let bnVoice = voices.find(v => v.lang.includes("bn"));
+// 🔥 Priority system
+let voiceBD = voices.find(v => v.lang === "bn-BD");
+let voiceBN = voices.find(v => v.lang.startsWith("bn"));
 
-if(bnVoice){
-u.voice = bnVoice;
+if(voiceBD){
+u.voice = voiceBD;
+}else if(voiceBN){
+u.voice = voiceBN;
 }else{
-u.lang = "bn-BD"; // fallback
+u.lang = "bn-BD";
 }
 
 }else{
@@ -214,10 +206,10 @@ speechSynthesis.cancel();
 speechSynthesis.speak(u);
 }
 
-/* GAME CODE */
+/* GAME */
 
 function getCategoryName(cat){
-const names={
+return {
 num:"Numbers",
 alphabet:"Alphabet",
 bn_vowel:"স্বরবর্ণ",
@@ -226,8 +218,7 @@ en_month:"English Month",
 bn_month:"বাংলা মাস",
 en_day:"English Day",
 bn_day:"বাংলা দিন"
-};
-return names[cat] || cat;
+}[cat];
 }
 
 function chunkArray(arr,size){
@@ -238,28 +229,14 @@ res.push(arr.slice(i,i+size));
 return res;
 }
 
-let numbers=[];
-for(let i=1;i<=100;i++) numbers.push(i.toString());
-
+let numbers=[...Array(100)].map((_,i)=>(i+1).toString());
 let alphabet="ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
 let bn_vowel=["অ","আ","ই","ঈ","উ","ঊ","ঋ","এ","ঐ","ও","ঔ"];
+let bn_consonant=["ক","খ","গ","ঘ","ঙ","চ","ছ","জ","ঝ","ঞ","ট","ঠ","ড","ঢ","ণ","ত","থ","দ","ধ","ন","প","ফ","ব","ভ","ম","য","র","ল","শ","ষ","স","হ"];
 
-let bn_consonant=[
-"ক","খ","গ","ঘ","ঙ","চ","ছ","জ","ঝ","ঞ",
-"ট","ঠ","ড","ঢ","ণ","ত","থ","দ","ধ","ন",
-"প","ফ","ব","ভ","ম","য","র","ল","শ","ষ","স","হ"
-];
-
-let en_month=[
-"January","February","March","April","May","June",
-"July","August","September","October","November","December"
-];
-
-let bn_month=[
-"বৈশাখ","জ্যৈষ্ঠ","আষাঢ়","শ্রাবণ","ভাদ্র","আশ্বিন",
-"কার্তিক","অগ্রহায়ণ","পৌষ","মাঘ","ফাল্গুন","চৈত্র"
-];
+let en_month=["January","February","March","April","May","June","July","August","September","October","November","December"];
+let bn_month=["বৈশাখ","জ্যৈষ্ঠ","আষাঢ়","শ্রাবণ","ভাদ্র","আশ্বিন","কার্তিক","অগ্রহায়ণ","পৌষ","মাঘ","ফাল্গুন","চৈত্র"];
 
 let en_day=["Saturday","Sunday","Monday","Tuesday","Wednesday","Thursday","Friday"];
 let bn_day=["শনিবার","রবিবার","সোমবার","মঙ্গলবার","বুধবার","বৃহস্পতিবার","শুক্রবার"];
@@ -275,19 +252,14 @@ en_day:chunkArray(en_day,16),
 bn_day:chunkArray(bn_day,16)
 };
 
-let currentCategory="";
-let currentLevel=0;
-let currentList=[];
-let currentStep=0;
-let startTime=0;
-let timerInterval;
+let currentCategory="",currentLevel=0,currentList=[],currentStep=0;
+let startTime=0,timerInterval;
 
 function startTimer(){
 startTime=Date.now();
 clearInterval(timerInterval);
 timerInterval=setInterval(()=>{
-let t=Math.floor((Date.now()-startTime)/1000);
-timer.innerText="Time: "+t+"s";
+timer.innerText="Time: "+Math.floor((Date.now()-startTime)/1000)+"s";
 },1000);
 }
 
@@ -300,17 +272,11 @@ currentStep=0;
 gameGrid.innerHTML="";
 result.innerText="";
 
-let totalLevels = levels[cat].length;
-let niceName = getCategoryName(cat);
-
-levelProgress.innerText =
-niceName + " | Level " + (lvl+1) + " / " + totalLevels;
+levelProgress.innerText=getCategoryName(cat)+" | Level "+(lvl+1)+" / "+levels[cat].length;
 
 startTimer();
 
-let items=currentList.slice().sort(()=>Math.random()-0.5);
-
-items.forEach(item=>{
+currentList.slice().sort(()=>Math.random()-0.5).forEach(item=>{
 let div=document.createElement("div");
 div.className="box";
 div.innerText=item;
@@ -325,34 +291,26 @@ gameGrid.appendChild(div);
 }
 
 function showWin(){
-result.innerText="🎉 Level " + (currentLevel+1) + " Complete!";
+result.innerText="🎉 Level "+(currentLevel+1)+" Complete!";
 result.className="win";
 playSound("win");
 }
 
 function check(el,val){
-
 if(val===currentList[currentStep]){
-
 gameGrid.insertBefore(el, gameGrid.children[currentStep]);
 el.style.background="green";
-
 currentStep++;
 
 if(currentStep===currentList.length){
-
 showWin();
-
-if(currentLevel < levels[currentCategory].length-1){
-setTimeout(()=>{
-startLevel(currentCategory,currentLevel+1);
-},1500);
+if(currentLevel<levels[currentCategory].length-1){
+setTimeout(()=>startLevel(currentCategory,currentLevel+1),1500);
 }else{
 clearInterval(timerInterval);
 result.innerText="🏆 All Completed!";
 }
 }
-
 }else{
 playSound("wrong");
 el.style.background="red";
