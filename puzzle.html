@@ -3,20 +3,117 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kids Puzzle - Final Categories</title>
+<title>Kids Puzzle - Final Pro</title>
+
 <style>
-body{margin:0;font-family:sans-serif;background:#e3f2fd;text-align:center;}
-header{background:#2196f3;color:white;padding:12px;display:flex;justify-content:space-between;align-items:center;}
-.home-btn{background:#4caf50;padding:6px 12px;border-radius:8px;color:white;text-decoration:none;}
-.top-buttons{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:10px;}
-.top-buttons button{padding:8px;border:none;border-radius:10px;background:#ff9800;color:white;font-size:12px;}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(70px,1fr));gap:10px;padding:10px;}
-.box{background:#4caf50;color:white;padding:15px;border-radius:10px;font-size:20px;cursor:pointer;user-select:none;}
-#result{font-size:20px;font-weight:bold;margin:5px;}
-#levelProgress{margin:10px;font-size:18px;font-weight:bold;color:#333;}
-#timer{font-size:16px;font-weight:bold;color:#555;}
+body{
+margin:0;
+font-family:sans-serif;
+background:#e3f2fd;
+text-align:center;
+}
+
+/* HEADER */
+header{
+background:#2196f3;
+color:white;
+padding:10px 15px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.home-btn{
+background:#4caf50;
+padding:6px 12px;
+border-radius:8px;
+color:white;
+text-decoration:none;
+}
+
+/* BUTTON AREA */
+.top-buttons{
+background:#e3f2fd;
+display:flex;
+flex-wrap:wrap;
+gap:10px;
+padding:10px;
+justify-content:center;
+position:sticky;
+top:0;
+z-index:10;
+}
+
+.top-buttons button{
+flex:1 1 120px;
+max-width:140px;
+height:40px;
+border:none;
+border-radius:8px;
+background:#ff9800;
+color:white;
+font-size:13px;
+}
+
+/* INFO BAR */
+.info-bar{
+background:white;
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:8px 15px;
+box-shadow:0 2px 5px rgba(0,0,0,0.1);
+font-weight:bold;
+position:sticky;
+top:60px;
+z-index:9;
+}
+
+#levelProgress{ color:#2196f3; }
+#timer{ color:#ff5722; }
+
+/* GAME AREA */
+.game-area{
+padding:15px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:12px;
+}
+
+.box{
+background:#4caf50;
+color:white;
+height:80px;
+display:flex;
+align-items:center;
+justify-content:center;
+border-radius:12px;
+font-size:clamp(16px,5vw,22px);
+cursor:pointer;
+transition:0.2s;
+}
+
+@keyframes pop{
+0%{transform:scale(0)}
+100%{transform:scale(1)}
+}
+
+.win{
+animation:pop 0.5s ease;
+color:#ff5722;
+font-size:24px;
+}
+
+#result{
+margin:10px;
+font-weight:bold;
+}
 </style>
 </head>
+
 <body>
 
 <header>
@@ -25,154 +122,247 @@ header{background:#2196f3;color:white;padding:12px;display:flex;justify-content:
 </header>
 
 <div class="top-buttons">
-<button onclick="startLevel('num')">Numbers 1-100</button>
+<button onclick="startLevel('num')">Numbers</button>
 <button onclick="startLevel('alphabet')">Alphabet</button>
 <button onclick="startLevel('bn_vowel')">স্বরবর্ণ</button>
 <button onclick="startLevel('bn_consonant')">ব্যঞ্জনবর্ণ</button>
-<button onclick="startLevel('en_month')">English Months</button>
+<button onclick="startLevel('en_month')">Eng Month</button>
 <button onclick="startLevel('bn_month')">বাংলা মাস</button>
-<button onclick="startLevel('en_day')">English Days</button>
+<button onclick="startLevel('en_day')">Eng Day</button>
 <button onclick="startLevel('bn_day')">বাংলা দিন</button>
-<button onclick="startLevel('en_vowel')">Vowels</button>
-<button onclick="startLevel('en_consonant')">Consonants</button>
 </div>
 
-<div id="levelProgress"></div>
+<div class="info-bar">
+<div id="levelProgress">Loading...</div>
 <div id="timer">Time: 0s</div>
+</div>
+
+<div class="game-area">
 <div class="grid" id="gameGrid"></div>
 <div id="result"></div>
-
-<!-- Sound -->
-<audio id="correctSound" src="correct.mp3"></audio>
-<audio id="wrongSound" src="wrong.mp3"></audio>
-<audio id="winSound" src="win.mp3"></audio>
+</div>
 
 <script>
-// ================== DATA ==================
-const levels = {
-    num: [
-        ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16"],
-        ["17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32"],
-        ["33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48"],
-        ["49","50","51","52","53","54","55","56","57","58","59","60","61","62","63","64"],
-        ["65","66","67","68","69","70","71","72","73","74","75","76","77","78","79","80"],
-        ["81","82","83","84","85","86","87","88","89","90","91","92","93","94","95","96"],
-        ["97","98","99","100"]
-    ],
-    alphabet: [
-        ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P"],
-        ["Q","R","S","T","U","V","W","X","Y","Z"]
-    ],
-    bn_vowel: [["অ","আ","ই","ঈ","উ","ঊ","ঋ","এ","ঐ","ও","ঔ"]],
-    bn_consonant: [["ক","খ","গ","ঘ","ঙ","চ","ছ","জ","ঝ","ঞ","ট","ঠ","ড","ঢ","ণ","ত","থ","দ","ধ","ন","প","ফ","ব","ভ","ম","য","র","ল","শ","ষ","স","হ"]],
-    en_month: [["January","February","March","April","May","June","July","August","September","October","November","December"]],
-    bn_month: [["বৈশাখ","জ্যৈষ্ঠ","আষাঢ়","শ্রাবণ","ভাদ্র","আশ্বিন","কার্তিক","অগ্রহায়ণ","পৌষ","মাঘ","ফাল্গুন","চৈত্র"]],
-    en_day: [["Saturday","Sunday","Monday","Tuesday","Wednesday","Thursday","Friday"]],
-    bn_day: [["শনিবার","রবিবার","সোমবার","মঙ্গলবার","বুধবার","বৃহস্পতিবার","শুক্রবার"]],
-    en_vowel: [["A","E","I","O","U"]],
-    en_consonant: [["B","C","D","F","G","H","J","K","L","M","N","P","Q","R","S","T","V","W","X","Y","Z"]]
+
+/* 🔊 SOUND SYSTEM */
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function beep(freq, duration){
+let osc = audioCtx.createOscillator();
+let gain = audioCtx.createGain();
+
+osc.connect(gain);
+gain.connect(audioCtx.destination);
+
+osc.frequency.value = freq;
+osc.type = "sine";
+
+osc.start();
+
+gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+
+osc.stop(audioCtx.currentTime + duration);
+}
+
+function playSound(type){
+if(type==="wrong") beep(150,0.5);
+
+if(type==="win"){
+beep(700,0.2);
+setTimeout(()=>beep(900,0.2),150);
+setTimeout(()=>beep(1100,0.3),300);
+}
+}
+
+document.body.addEventListener("click", () => {
+if(audioCtx.state === "suspended"){
+audioCtx.resume();
+}
+}, { once:true });
+
+/* 🔊 VOICE SYSTEM (FINAL FIX) */
+let voices = [];
+
+speechSynthesis.onvoiceschanged = () => {
+voices = speechSynthesis.getVoices();
 };
 
-// ================== VARIABLES ==================
-let currentCategory = "";
-let currentLevel = 0;
-let currentList = [];
-let currentStep = 0;
-let startTime = 0;
+function speak(text){
+
+// ❌ voice OFF for letters
+if(currentCategory==="bn_vowel" || currentCategory==="bn_consonant") return;
+
+let u = new SpeechSynthesisUtterance(text);
+
+// বাংলা voice
+if(currentCategory==="bn_month" || currentCategory==="bn_day"){
+
+let bnVoice = voices.find(v => v.lang.includes("bn"));
+
+if(bnVoice){
+u.voice = bnVoice;
+}else{
+u.lang = "bn-BD"; // fallback
+}
+
+}else{
+u.lang = "en-US";
+}
+
+speechSynthesis.cancel();
+speechSynthesis.speak(u);
+}
+
+/* GAME CODE */
+
+function getCategoryName(cat){
+const names={
+num:"Numbers",
+alphabet:"Alphabet",
+bn_vowel:"স্বরবর্ণ",
+bn_consonant:"ব্যঞ্জনবর্ণ",
+en_month:"English Month",
+bn_month:"বাংলা মাস",
+en_day:"English Day",
+bn_day:"বাংলা দিন"
+};
+return names[cat] || cat;
+}
+
+function chunkArray(arr,size){
+let res=[];
+for(let i=0;i<arr.length;i+=size){
+res.push(arr.slice(i,i+size));
+}
+return res;
+}
+
+let numbers=[];
+for(let i=1;i<=100;i++) numbers.push(i.toString());
+
+let alphabet="ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
+let bn_vowel=["অ","আ","ই","ঈ","উ","ঊ","ঋ","এ","ঐ","ও","ঔ"];
+
+let bn_consonant=[
+"ক","খ","গ","ঘ","ঙ","চ","ছ","জ","ঝ","ঞ",
+"ট","ঠ","ড","ঢ","ণ","ত","থ","দ","ধ","ন",
+"প","ফ","ব","ভ","ম","য","র","ল","শ","ষ","স","হ"
+];
+
+let en_month=[
+"January","February","March","April","May","June",
+"July","August","September","October","November","December"
+];
+
+let bn_month=[
+"বৈশাখ","জ্যৈষ্ঠ","আষাঢ়","শ্রাবণ","ভাদ্র","আশ্বিন",
+"কার্তিক","অগ্রহায়ণ","পৌষ","মাঘ","ফাল্গুন","চৈত্র"
+];
+
+let en_day=["Saturday","Sunday","Monday","Tuesday","Wednesday","Thursday","Friday"];
+let bn_day=["শনিবার","রবিবার","সোমবার","মঙ্গলবার","বুধবার","বৃহস্পতিবার","শুক্রবার"];
+
+const levels={
+num:chunkArray(numbers,16),
+alphabet:chunkArray(alphabet,16),
+bn_vowel:chunkArray(bn_vowel,16),
+bn_consonant:chunkArray(bn_consonant,16),
+en_month:chunkArray(en_month,16),
+bn_month:chunkArray(bn_month,16),
+en_day:chunkArray(en_day,16),
+bn_day:chunkArray(bn_day,16)
+};
+
+let currentCategory="";
+let currentLevel=0;
+let currentList=[];
+let currentStep=0;
+let startTime=0;
 let timerInterval;
 
-// ================== SOUND ==================
-function playSound(type){
-    const sound = {
-        correct: document.getElementById("correctSound"),
-        wrong: document.getElementById("wrongSound"),
-        win: document.getElementById("winSound")
-    };
-    if(sound[type]){
-        sound[type].currentTime = 0;
-        sound[type].play();
-    }
-}
-
-// ================== VOICE ==================
-function speak(text){
-    // নাম্বার বা ইংরেজি অক্ষরের জন্য ভয়েস
-    if(/^[A-Z0-9]+$/.test(text)){
-        try{
-            const msg = new SpeechSynthesisUtterance(text);
-            msg.lang = "en-US";
-            speechSynthesis.speak(msg);
-        }catch(e){}
-    }
-}
-
-// ================== TIMER ==================
 function startTimer(){
-    startTime = Date.now();
-    clearInterval(timerInterval);
-    timerInterval = setInterval(()=>{
-        let elapsed = Math.floor((Date.now() - startTime)/1000);
-        document.getElementById("timer").innerText = `Time: ${elapsed}s`;
-    },1000);
+startTime=Date.now();
+clearInterval(timerInterval);
+timerInterval=setInterval(()=>{
+let t=Math.floor((Date.now()-startTime)/1000);
+timer.innerText="Time: "+t+"s";
+},1000);
 }
 
-function stopTimer(){ clearInterval(timerInterval); }
+function startLevel(cat,lvl=0){
+currentCategory=cat;
+currentLevel=lvl;
+currentList=levels[cat][lvl];
+currentStep=0;
 
-// ================== START LEVEL ==================
-function startLevel(category){
-    currentCategory = category;
-    currentLevel = 0;
-    loadLevel();
+gameGrid.innerHTML="";
+result.innerText="";
+
+let totalLevels = levels[cat].length;
+let niceName = getCategoryName(cat);
+
+levelProgress.innerText =
+niceName + " | Level " + (lvl+1) + " / " + totalLevels;
+
+startTimer();
+
+let items=currentList.slice().sort(()=>Math.random()-0.5);
+
+items.forEach(item=>{
+let div=document.createElement("div");
+div.className="box";
+div.innerText=item;
+
+div.onclick=()=>{
+speak(item);
+check(div,item);
+};
+
+gameGrid.appendChild(div);
+});
 }
 
-// ================== LOAD LEVEL ==================
-function loadLevel(){
-    currentList = levels[currentCategory][currentLevel];
-    currentStep = 0;
-    document.getElementById("gameGrid").innerHTML="";
-    document.getElementById("result").innerText="";
-    document.getElementById("levelProgress").innerText = `Level ${currentLevel+1} of ${levels[currentCategory].length}`;
-    startTimer();
-
-    let items = currentList.slice().sort(()=>Math.random()-0.5);
-    items.forEach(item=>{
-        const div = document.createElement("div");
-        div.className="box";
-        div.innerText = item;
-        div.onclick = ()=>checkAnswer(div,item);
-        document.getElementById("gameGrid").appendChild(div);
-    });
+function showWin(){
+result.innerText="🎉 Level " + (currentLevel+1) + " Complete!";
+result.className="win";
+playSound("win");
 }
 
-// ================== CHECK ANSWER ==================
-function checkAnswer(el,value){
-    speak(value);
-    if(value === currentList[currentStep]){
-        el.style.background="green";
-        playSound("correct");
-        currentStep++;
-        if(currentStep === currentList.length){
-            stopTimer();
-            playSound("win");
-            const elapsed = Math.floor((Date.now() - startTime)/1000);
-            document.getElementById("result").innerText=`🎉 Level Completed in ${elapsed}s!`;
-            if(currentLevel < levels[currentCategory].length-1){
-                currentLevel++;
-                setTimeout(loadLevel,1500);
-            } else {
-                document.getElementById("result").innerText+=" 🏆 All levels finished!";
-            }
-        }
-    } else {
-        el.style.background="red";
-        playSound("wrong");
-        document.getElementById("result").innerText="❌ Wrong!";
-        setTimeout(loadLevel,800);
-    }
+function check(el,val){
+
+if(val===currentList[currentStep]){
+
+gameGrid.insertBefore(el, gameGrid.children[currentStep]);
+el.style.background="green";
+
+currentStep++;
+
+if(currentStep===currentList.length){
+
+showWin();
+
+if(currentLevel < levels[currentCategory].length-1){
+setTimeout(()=>{
+startLevel(currentCategory,currentLevel+1);
+},1500);
+}else{
+clearInterval(timerInterval);
+result.innerText="🏆 All Completed!";
+}
 }
 
-// ================== START DEFAULT ==================
-window.onload = ()=>startLevel("num");
+}else{
+playSound("wrong");
+el.style.background="red";
+setTimeout(()=>startLevel(currentCategory,currentLevel),500);
+}
+}
+
+window.onload=()=>startLevel("num");
+
 </script>
+
 </body>
 </html>
