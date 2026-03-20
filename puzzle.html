@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="bn">
 <head>
@@ -168,35 +169,22 @@ document.body.addEventListener("click", () => {
 if(audioCtx.state==="suspended") audioCtx.resume();
 }, {once:true});
 
-/* 🔊 FINAL VOICE FIX */
+/* 🔇 FINAL VOICE (BANGLA OFF) */
 function speak(text){
 
-// ❌ voice OFF for letters
-if(currentCategory==="bn_vowel" || currentCategory==="bn_consonant") return;
+// ❌ সব বাংলা category mute
+if(
+currentCategory==="bn_vowel" ||
+currentCategory==="bn_consonant" ||
+currentCategory==="bn_month" ||
+currentCategory==="bn_day"
+){
+return;
+}
 
+// ✅ শুধু English voice
 let u = new SpeechSynthesisUtterance(text);
-
-if(currentCategory==="bn_month" || currentCategory==="bn_day"){
-
-let voices = speechSynthesis.getVoices();
-
-// ✅ Only Bangla allowed
-let voiceBD = voices.find(v => v.lang === "bn-BD");
-let voiceBN = voices.find(v => v.lang.startsWith("bn"));
-
-if(voiceBD){
-u.voice = voiceBD;
-}
-else if(voiceBN){
-u.voice = voiceBN;
-}
-else{
-return; // ❌ No Bangla → no sound
-}
-
-}else{
 u.lang = "en-US";
-}
 
 speechSynthesis.cancel();
 speechSynthesis.speak(u);
